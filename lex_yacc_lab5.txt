@@ -1,0 +1,136 @@
+// Lex and Yacc program for calculator
+
+// Lex:
+%{
+/* Definition section */
+#include<stdio.h>
+#include "y.tab.h"
+extern int yylval;
+%}
+
+/* Rule Section */
+%%
+[0-9]+ {
+   	 yylval=atoi(yytext);
+   	 return NUMBER;
+
+    }
+[\t] ;
+
+[\n] return 0;
+
+. return yytext[0];
+
+%%
+
+int yywrap()
+{
+return 1;
+}
+
+
+// Yacc:
+%{
+#include <stdio.h>
+
+int flag = 0;
+/* Rule Section */
+%}
+
+%token NUMBER
+%left '+' '-'
+%left '*' '/' '%'
+%right '^'
+%left '(' ')'
+
+%%
+
+ArithmeticExpression: E{
+	printf("\nResult=%d\n", $1);
+	return 0;
+};
+
+E: E '+' E {$$ = $1 + $3;}
+ | E '-' E {$$ = $1 - $3;}
+ | E '*' E {$$ = $1 * $3;}
+ | E '/' E {$$ = $1 / $3;}
+ | E '%' E {$$ = $1 % $3;}
+ | E '^' E {
+ 	int result = 1;
+ 	for (int i = 0; i < $3; i++) {
+     	result *= $1;
+ 	}
+ 	$$ = result;
+ }
+ | '(' E ')' {$$ = $2;}
+ | NUMBER {$$ = $1;}
+ ;
+
+%%
+
+// Driver code
+int main() {
+	printf("\nEnter Any Arithmetic Expression which can have operations Addition, Subtraction, Multiplication, Division, Modulus,Exponent and Round brackets:\n");
+	yyparse();
+    
+	if (flag == 0) {
+    	printf("\nEntered arithmetic expression is Valid\n\n");
+	}
+
+	return 0;
+}
+
+void yyerror() {
+	printf("\nEntered arithmetic expression is Invalid\n\n");
+	flag = 1;
+}
+
+
+
+// Lex and Yacc program for infix to postfix conversion
+
+// Lex:
+%{
+#include"y.tab.h"
+extern int yylval;
+%}
+%%
+[0-9]+  {yylval=atoi(yytext); return NUM;}
+\n      return 0;
+.       return *yytext;
+%%
+
+int yywrap(){
+    return 1;
+}
+
+// Yacc:
+%{
+#include<stdio.h>
+%}
+%token NUM
+%left '+' '-'
+%left '*' '/'
+%right NEGATIVE
+%%
+S:  E {printf("\n");}
+    ;
+E:  E '+' E {printf("+");}
+    |   E '*' E {printf("*");}
+    |   E '-' E {printf("-");}
+    |   E '/' E {printf("/");}
+    |   '(' E ')'
+    |   '-' E %prec NEGATIVE {printf("-");}
+    |   NUM     {printf("%d", yylval);}
+    ;
+%%
+
+int main(){
+    yyparse();
+}
+
+int yyerror (char *msg) {
+    return printf ("error YACC: %s\n", msg);
+}
+
+

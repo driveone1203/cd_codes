@@ -1,0 +1,1088 @@
+
+Exercise 1
+Write a program in C to implement Lexical Analyzer which generates 
+tokens for given input C coding and also print the symbol table which is 
+generated during the lexical analysis.
+#include <stdio.h>
+#include <math.h>
+#define PI 3.14
+void main()
+{
+int radius_cir;
+float perimeter, area_1;
+int i, code;
+for(i=1;i<=10;i++)
+ {
+ scanf("%d", &code);
+ scanf("%d", &radius_cir);
+ if (code==1)
+ { area_1 = PI * pow(radius_cir,2);
+ printf("area of the circle %f”, area_1);
+ }
+ else
+ {
+ perimeter = 2 * PI * radius_cir;
+ printf("perimeter of the circle %f", perimeter);
+ }
+ }
+}
+Program:
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#define MAX_KEYWORDS 6
+#define MAX_STRING_LENGTH 50
+void analyzeToken(FILE *output, const char *token, const char *type) {
+ fprintf(output, "%s %s\n", token, type);
+}
+int main() {
+ FILE *input = fopen("input.c", "r");
+ FILE *output = fopen("out.txt", "w");
+ if (input == NULL || output == NULL) {
+ perror("Error opening files");
+ return 1;
+ }
+ char keywords[MAX_KEYWORDS][MAX_STRING_LENGTH] = {"int", 
+"main", "if", "else", "do", "while"};
+ char str[MAX_STRING_LENGTH];
+ int i = 0;
+ char ch;
+ while ((ch = fgetc(input)) != EOF) {
+ if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '>' || ch == '<' || ch == 
+'=') {
+ analyzeToken(output, &ch, "is an operator");
+ } else if (isdigit(ch)) {
+ str[i++] = ch;
+ while ((ch = fgetc(input)) != EOF && isdigit(ch)) {
+ str[i++] = ch;
+ }
+ str[i] = '\0';
+ analyzeToken(output, str, "is a constant");
+ i = 0;
+ ungetc(ch, input);
+ } else if (isalpha(ch) || ch == '_') {
+ str[i++] = ch;
+ while ((ch = fgetc(input)) != EOF && (isalnum(ch) || ch == '_')) {
+ str[i++] = ch;
+ }
+ str[i] = '\0';
+ int isKeyword = 0;
+ for (int j = 0; j < MAX_KEYWORDS; j++) {
+ if (strcmp(keywords[j], str) == 0) {
+ isKeyword = 1;
+ break;
+ }
+ }
+ if (isKeyword) {
+ analyzeToken(output, str, "is a keyword");
+ } else {
+ analyzeToken(output, str, "is an identifier");
+ }
+ i = 0;
+ ungetc(ch, input);
+ }
+ }
+ fclose(input);
+ fclose(output);
+ return 0;
+}
+Input code:
+#include <stdio.h>
+int a, b, c;
+void main() {
+ scanf("%d\n %d", &a, &b);
+ c = a + b*a;
+ printf("%d", c);
+}
+
+
+Exercise 2
+1. Write a Lex program to generate lexical analyzer which generates 
+tokens for given input C++ coding.
+Code:
+#include <iostream>
+using namespace std;
+class Room {
+public:
+double length;
+double breadth;
+double height;
+double calculateArea() {
+return length * breadth;
+}
+double calculateVolume() {
+return length * breadth * height;
+ }
+};
+int main() {
+ Room room1;
+ room1.length = 42.5;
+ room1.breadth = 30.8;
+ room1.height = 19.2;
+ /* calculate and display the area and volume of the room */
+ cout << "Area of Room = " << room1.calculateArea() << endl;
+ cout << "Volume of Room = " << room1.calculateVolume() << endl;
+ 
+ if (room1.calculateArea()>room1.calculateVolume())
+ cout << "Area is More"<<endl;
+ else 
+ cout << "volume is More"<<endl;
+ return 0;
+}
+Lex program:
+%{
+int COMMENT=0;
+%}
+%%
+[ \t\n] { /* Ignore white space */ }
+#.* { printf("%s is a Preprocessor Directive\n", yytext); }
+int |
+float |
+double |
+return |
+main |
+if |
+else |
+cin |
+cout |
+for |
+char |
+getch |
+class |
+endl |
+while {printf("%s is a Keyword\n", yytext);}
+\<.*\.h\> { printf("%s is a Header File\n", yytext); }
+"/*" { COMMENT=1; }
+"*/" { COMMENT=0; printf("Block Comment Ends\n"); }
+[a-zA-Z][a-zA-Z0-9]* {
+if (!COMMENT) {
+printf("%s is an Identifier\n", yytext);
+}
+}
+\{ { if (!COMMENT) { printf("Block Begins\n"); } }
+\} { if (!COMMENT) { printf("Block Ends\n"); } }
+".*" { if (!COMMENT) { printf("%s is a String\n", yytext); } }
+[0-9]+(\.[0-9]+)? {if (!COMMENT) {printf("%s is a Number\n", yytext);}}
+\= |
+\+ |
+\- |
+\* |
+\/ |
+\% {if (!COMMENT) {printf("%s is an Arithmetic Operator\n", yytext);}}
+\<= |
+\>= |
+\< |
+\> |
+\!= |
+\== {if (!COMMENT) {printf("%s is a Relational Operator\n", yytext);}}
+\<< {if (!COMMENT) {printf("%s is a Insertion Operator\n", yytext);}}
+[^\w\s\+\!\=\*\/#%] {if (!COMMENT) {printf("%s is Punctuation\n", yytext);}}
+%%
+int main(int argc, char **argv)
+{
+if(argc>1)
+{
+FILE *f1;
+f1=fopen(argv[1],"r");
+if(f1)
+{
+yyin=f1;
+}
+}
+yylex();
+return 0;
+}
+int yywrap()
+{
+return 0;
+}
+Output:
+
+2. Write a Lex program to generate tokenizer which annotates the given 
+student dataset
+APPLICATION NO REGISTER NO NAME MOBILE NUMBER EMAIL
+DOB
+A_2022035719 21BCE1013 AYDHIN ABDUL WARIS 9349377717
+aydhinabdul.waris2021@vitstudent.ac.in 10-Apr-2003
+A_2022041350 21BCE1018 SHRIYA SANJAY NARIKUTTY KOILERY 7010080485
+shriyasanjay.nari2021@vitstudent.ac.in 11-Mar-2003
+A_2022043910 21BCE1054 QASIM FAKHARUDDIN NALAWALA 5517584011
+qasim.fakharuddin2021@vitstudent.ac.in 20-Jan-2003
+A_2022034703 21BCE1072 B VIJAYADHARSHNI 9342547650
+vijayadharshni.2021@vitstudent.ac.in 21-Sep-2003
+A_2022038287 21BCE1183 KADAM SARVESH DADASAHEB 7588277703
+sarveshdadasaheb.kadam2021@vitstudent.ac.in 10-Oct-2003
+A_2022042639 21BCE1258 SAINI MEETESH DEVISAHAY 8690280521
+sainimeetesh.devisahay2021@vitstudent.ac.in 30-Dec-2003
+A_2022039566 21BCE1292 PATEL BHAVYA MANISHKUMAR 9558120322
+patelbhavya.manishkumar2021@vitstudent.ac.in 13-Feb-2003
+A_2022040329 21BCE1350 JOEL ABRAHAM KOSHY 8547729389
+joelabraham.koshy2021@vitstudent.ac.in 24-Apr-2003
+A_2022032648 21BCE1408 VARSHA POTHUKANAMA 8919279097
+varsha.pothukanama2021@vitstudent.ac.in 05-Mar-2003
+A_2022042891 21BCE1440 CHARVI UPRETI 9899112792
+charvi.upreti2021@vitstudent.ac.in 09-Jun-2003
+Lex Program
+%{
+#include <stdio.h>
+%}
+%option noyywrap
+APPLICATON_NO A_([0-9])+[0-9]+
+REGISTER_NO 21BCE([0-9])+[0-9]+
+NAME [A-Z][a-zA-Z ]+
+MOBILE_NUMBER [1-9][0-9]{9}
+EMAIL [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}
+DOB [0-9]{2}-[a-zA-Z]{3}-[0-9]{4}
+%%
+{APPLICATON_NO} { printf("%s is APPLICATION NO\n", yytext); }
+{REGISTER_NO} { printf("%s is REGISTER NO\n", yytext); }
+{NAME} { printf("%s is NAME\n", yytext); }
+{MOBILE_NUMBER} { printf("%s is MOBILE NUMBER\n", yytext); }
+{EMAIL} { printf("%s is EMAIL\n", yytext); }
+{DOB} { printf("%s is DOB\n", yytext); }
+.|\n {}
+%%
+extern FILE *yyin; // Declare yyin as external variable
+int main(int argc, char *argv[]) {
+if (argc != 2) {
+fprintf(stderr, "Usage: %s <input_file>\n", argv[0]);
+return 1;
+}
+yyin = fopen(argv[1], "r"); // Open the input file for reading
+if (!yyin) {
+perror("fopen");
+return 1;
+}
+yylex(); // Call the lexer
+fclose(yyin); // Close the input file
+return 0;
+}
+Txt:
+APPLICATION NO REGISTER NO NAME MOBILE NUMBER EMAIL
+DOB
+A_2022035719 21BCE1013 AYDHIN ABDUL WARIS 9349377717
+aydhinabdul.waris2021@vitstudent.ac.in 10-Apr-2003
+A_2022041350 21BCE1018 SHRIYA SANJAY NARIKUTTY KOILERY 7010080485
+shriyasanjay.nari2021@vitstudent.ac.in 11-Mar-2003
+A_2022043910 21BCE1054 QASIM FAKHARUDDIN NALAWALA 5517584011
+qasim.fakharuddin2021@vitstudent.ac.in 20-Jan-2003
+A_2022034703 21BCE1072 B VIJAYADHARSHNI 9342547650
+vijayadharshni.2021@vitstudent.ac.in 21-Sep-2003
+A_2022038287 21BCE1183 KADAM SARVESH DADASAHEB 7588277703
+sarveshdadasaheb.kadam2021@vitstudent.ac.in 10-Oct-2003
+A_2022042639 21BCE1258 SAINI MEETESH DEVISAHAY 8690280521
+sainimeetesh.devisahay2021@vitstudent.ac.in 30-Dec-2003
+A_2022039566 21BCE1292 PATEL BHAVYA MANISHKUMAR 9558120322
+patelbhavya.manishkumar2021@vitstudent.ac.in 13-Feb-2003
+A_2022040329 21BCE1350 JOEL ABRAHAM KOSHY 8547729389
+joelabraham.koshy2021@vitstudent.ac.in 24-Apr-2003
+A_2022032648 21BCE1408 VARSHA POTHUKANAMA 8919279097
+varsha.pothukanama2021@vitstudent.ac.in 05-Mar-2003
+A_2022042891 21BCE1440 CHARVI UPRETI 9899112792
+charvi.upreti2021@vitstudent.ac.in 09-Jun-2003
+Output:
+
+
+ Exercise3
+1. Construct a Recursive Decent Parser for the following Grammar
+E → E + T | T
+T → T * F | F
+F → (E) | [a-z]
+Parse the following string 
+1) a+b*c+d
+2) a*c+*d
+3) )a+b*c
+4) ((a+b)*c
+Code: 
+#include <stdio.h>
+#include <string.h>
+char input[100];
+int i = 0;
+char output[1000];
+int E();
+int T();
+int TP();
+int F();
+int EP();
+int main() {
+ printf("21BLC1122 Vaibhav Kumawat\n");
+ printf("Enter an arithmetic expression: ");
+ scanf("%s", input);
+ if (E() && input[i] == '$') {
+ strcat(output, "\nString is accepted\n");
+ } else {
+ strcat(output, "\nString is not accepted\n");
+ }
+ printf("%s", output);
+ return 0;
+}
+int E() {
+ strcat(output, "E -> T + EP\n");
+ if (T()) {
+ if (EP()) {
+ return 1;
+ }
+ }
+ return 0;
+}
+int EP() {
+ if (input[i] == '+' || input[i] == '-') {
+ strcat(output, "EP -> + T EP\n");
+ i++;
+ if (T()) {
+ if (EP()) {
+ return 1;
+ }
+ return 0;
+ }
+ return 0;
+ } else {
+ strcat(output, "EP -> epsilon\n");
+ return 1;
+ }
+}
+int T() {
+ strcat(output, "T -> F * TP\n");
+ if (F()) {
+ if (TP()) {
+ return 1;
+ }
+ }
+ return 0;
+}
+int TP() {
+ if (input[i] == '*' || input[i] == '/') {
+ strcat(output, "TP -> * F TP\n");
+ i++;
+ if (F()) {
+ if (TP()) {
+ return 1;
+ }
+ return 0;
+ }
+ return 0;
+ } else {
+ strcat(output, "TP -> epsilon\n");
+ return 1;
+ }
+}
+int F() {
+ if (input[i] == '(') {
+ strcat(output, "F -> ( E )\n");
+ i++;
+ if (E()) {
+ if (input[i] == ')') {
+ i++;
+ return 1;
+ }
+ return 0;
+ }
+ return 0;
+ } else if ((input[i] >= 'a' && input[i] <= 'z') || (input[i] >= 'A' && input[i] 
+<= 'Z')) {
+ strcat(output, "F -> [a-zA-Z]\n");
+ i++;
+ return 1;
+ }
+ return 0;
+}
+Output:
+
+2. Construct a Recursive Decent Parser for the following Grammar
+E → E # T | T
+T → T & F | F
+F → ! F | ( E ) | [a-z]
+ Parse the following string
+1) a#b&!c
+2) a&#b
+3) a#b&!c)
+4) (a#b)&c)
+Code:
+#include <stdio.h> 
+char input[100]; 
+int i = 0; 
+int E(); 
+int T(); 
+int F(); 
+int main() { 
+printf("21BLC1122 Vaibhav Kumawat\n");
+printf("Enter a logical expression: "); 
+scanf("%s", input); 
+if (E()) { 
+if (input[i] == '$') 
+printf("\nString is accepted\n"); 
+else 
+printf("\nString is not accepted\n"); 
+} else 
+printf("\nString is not accepted\n"); 
+return 0; 
+} 
+int E() { 
+if (T()) { 
+if (input[i] == '#') { 
+i++; 
+if (E()) { 
+printf("E -> E # T\n"); 
+return 1; 
+} else 
+return 0; 
+} else { 
+printf("E -> T\n"); 
+return 1; 
+} 
+} else 
+return 0; 
+} 
+int T() { 
+if (F()) { 
+if (input[i] == '&') { 
+i++; 
+if (T()) { 
+printf("T -> T & F\n"); 
+return 1; 
+} else 
+return 0; 
+} else { 
+printf("T -> F\n"); 
+return 1; 
+} 
+} else 
+return 0; 
+} 
+int F() { 
+if (input[i] == '!') { 
+i++; 
+if (F()) { 
+printf("F -> ! F\n"); 
+return 1; 
+} else 
+return 0; 
+} else if (input[i] == '(') { 
+i++; 
+if (E()) { 
+if (input[i] == ')') { 
+i++; 
+printf("F -> ( E )\n"); 
+return 1; 
+} else 
+return 0; 
+} else 
+return 0; 
+} else if ((input[i] >= 'a' && input[i] <= 'z') || (input[i] >= 'A' && input[i] <= 'Z')) { 
+i++; 
+printf("F -> [a-z]\n"); 
+return 1; 
+} else 
+return 0; 
+}
+Output:
+
+
+
+1. Using the Predictive Parsing, parse the given set of Strings with the grammar provided 
+E → E + T | T
+T → T * F | F
+F → (E) | i
+Use the Predictive Parsing table
+Input Strings
+1) i+i*i+i
+2) i*i+*i
+3) )i+i*i
+4) ((i+i)*i
+Code:
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <string.h> 
+int i = 0, top = 0; 
+char stack[20], ip[20]; 
+void push(char c) { 
+ if (top >= 20) 
+ printf("Stack Overflow"); 
+ else 
+ stack[top++] = c; 
+} 
+void pop() { 
+ if (top < 0) 
+ printf("Stack underflow"); 
+ else 
+ top--; 
+} 
+void error() { 
+ printf("\n Syntax Error"); 
+ exit(0); 
+} 
+int main() { 
+ int n; 
+ printf("Enter the string to be parsed\n"); 
+ scanf("%s", ip); 
+ n = strlen(ip); 
+ ip[n] = '$'; 
+ ip[n + 1] = '\0'; 
+ push('$'); 
+ push('E'); 
+ while (ip[i] != '\0') { 
+ if (ip[i] == '$' && stack[top - 1] == '$') { 
+ printf("\n Parsing done successful\n"); 
+ return 0; 
+ } else if (ip[i] == stack[top - 1]) { 
+ printf("\n match of %c\n", ip[i]); 
+ i++; 
+ pop(); 
+ } else { 
+ if (stack[top - 1] == 'E' && (ip[i] == 'i' || ip[i] == '(')) { 
+ printf("\nE->TA\n"); 
+ pop(); 
+ push('A'); 
+ push('T'); 
+ } else if (stack[top - 1] == 'A' && ip[i] == '+') { 
+ printf("\nA->+TA\n"); 
+ pop(); 
+ push('A'); 
+ push('T'); 
+ push('+'); 
+ } else if (stack[top - 1] == 'A' && (ip[i] == ')' || ip[i] == '$')) { 
+ printf("\nA->epsilon"); 
+ pop(); 
+ } else if (stack[top - 1] == 'T' && (ip[i] == 'i' || ip[i] == '(')) { 
+ printf("\nT->FB\n"); 
+ pop(); 
+ push('B'); 
+ push('F'); 
+ } else if (stack[top - 1] == 'B' && (ip[i] == '+' || ip[i] == ')' || 
+ ip[i] == '$')) { 
+ printf("\nB->epsilon\n"); 
+ pop(); 
+ } else if (stack[top - 1] == 'B' && ip[i] == '*') { 
+ printf("\nB->*FB\n"); 
+ pop(); 
+ push('B'); 
+ push('F'); 
+ push('*'); 
+ } else if (stack[top - 1] == 'F' && ip[i] == 'i') { 
+ printf("\nF->i\n"); 
+ pop(); 
+ push('i'); 
+ } else if (stack[top - 1] == 'F' && ip[i] == '(') { 
+ printf("\nF->(E)\n"); 
+ pop(); 
+ push(')'); 
+ push('E'); 
+ push('('); 
+ } else { 
+ error(); 
+ } 
+ } 
+ } 
+ return 0; 
+}
+Output:
+i)
+
+ii)
+iii)
+iv)
+
+2. Design a predictive parsing table for the following grammar. Implement the predictive parsing using 
+the parsing table and check whether the following strings satisfies the grammar.
+Grammar
+ S → ( L ) | a
+ L → L , S | S
+Input Strings
+1. (a , (a , a))
+2. (a , a) , a )
+Code:
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#define STACK_SIZE 100
+char *prod_rules[] = {
+ "SL", // S -> (L)
+ "a", // S -> a
+ "LS", // L -> LS
+ "S" // L -> S
+};
+char *parse_table[2][4] = {
+ {"(L)", NULL, "a", NULL}, // S row
+ {"LS", NULL, "S", NULL} // L row
+};
+bool isTerminal(char c) {
+ return c == '(' || c == ')' || c == 'a' || c == ',';
+}
+bool predictiveParse(char *input) {
+ char stack[STACK_SIZE];
+ int top = -1;
+ stack[++top] = 'S'; // Push start symbol S to stack
+ int idx = 0;
+ while (stack[top] != '\0') {
+ char X = stack[top];
+ char a = input[idx];
+ if (X == a) {
+ top--;
+ idx++;
+ } else if (isTerminal(X)) {
+ // Mismatched terminal, error
+ return false;
+ } else {
+ int row = (X == 'S') ? 0 : 1;
+ int col;
+ switch (a) {
+ case '(':
+ col = 0;
+ break;
+ case ')':
+ col = 1;
+ break;
+ case 'a':
+ col = 2;
+ break;
+ case ',':
+ col = 3;
+ break;
+ default:
+ // Invalid input symbol
+ return false;
+ }
+ char *production = parse_table[row][col];
+ if (production == NULL) {
+ return false;
+ }
+ top--;
+ // Push the production to stack in reverse order
+ int len = strlen(production);
+ for (int i = len - 1; i >= 0; i--) {
+ stack[++top] = production[i];
+ }
+ }
+ }
+ return stack[top] == '\0' && input[idx] == '\0';
+}
+int main() {
+ char *inputs[] = {
+ "(a , (a , a))",
+ "(a , a) , a )"
+ };
+ for (int i = 0; i < 2; i++) {
+ printf("Input String %d: %s\n", i + 1, inputs[i]);
+ if (predictiveParse(inputs[i])) {
+ printf("Parsing successful\n");
+ } else {
+ printf("Parsing failed\n");
+ }
+ }
+ return 0;
+}
+Output:
+
+ LAB-5
+a. Design LALR parser using YACC & Lex tool to check the syntax of 
+Arithmetic expression contains following operator : 
++, -, /, *, %, ^, (, ), ++, --
+ Parse the following expression and give the status
+1) q * --r ^ s / u++
+2) b * * c / d + e
+3) x % y - (a - ++b)
+Code:
+%{
+# include "y.tab.h"
+extern int yylval;
+%}
+%%
+[0-9]+ {yylval=atoi(yytext); return digit;}
+[\t] ;
+[\n] return 0;
+. return yytext[0];
+%%
+int yywrap()
+{
+return 0;
+}
+%{
+#include<ctype.h>
+#include<stdio.h>
+#include<stdlib.h>
+int yylex();
+int yywrap();
+%}
+%token digit
+%%
+S :E {printf("syntax is Correct\n\n");}
+E : E'+'T
+ | E'-'T
+ | T
+ ;
+T : T'*'P
+ | T'/'P
+ |P
+ ;
+P : F'^'P
+ | F
+ ;
+F : '('E')'
+ |digit
+ ;
+%%
+#include"lex.yy.c"
+int main()
+{
+ printf("Enter infix expression: ");
+ yyparse();
+}
+yyerror()
+{
+ printf("Error\n");
+}
+
+Design LALR parser using YACC & Lex tool to calculate the value of 
+the given Arithmetic expression based on precedence of the operators. 
+Arithmetic expression contains following operator : 
++, -, /, *, %, ^, (, ), ++, --
+ Give the value of the expression
+ 5 + 6 * 8 – 2
+ 100 / 5 ^ 2 + --5
+ 20%3++*(3--^3)
+Code:
+Lex Program:
+%{
+#include "y.tab.h" 
+extern int yylval;
+%}
+%%
+[0-9]+ {yylval=atoi(yytext); return digit;} 
+[\t] ;
+[\n] return 0;
+. return yytext[0];
+%%
+int yywrap()
+{
+return 0;
+}
+Design LALR parser for the following grammar using YACC & Lex tool 
+and check whether given strings can be parsed using the grammar
+S → a | ^ | ( R )
+R → T
+T → S , T | S
+Note : symbols given in red colour are terminals
+Strings To be parsed
+Code:
+lexer.l
+%{
+#include "y.tab.h"
+extern int yylval;
+%}
+%%
+"a" { return T_A; }
+"^" { return T_CARET; }
+"," { return T_COMMA; }
+"(" { return T_LPAREN; }
+")" { return T_RPAREN; }
+[ \t\n] ;
+. { printf("Unexpected character %c\n", yytext[0]); exit(1); }
+%%
+int yywrap(void) {
+ return 1;
+}
+parser.y
+%{
+#include <stdio.h>
+extern int yylex();
+extern int yylineno;
+void yyerror(char *s);
+%}
+%token T_A T_CARET T_COMMA T_LPAREN T_RPAREN
+%%
+S : T_A { printf("Parsed 'a'\n"); }
+ | T_CARET { printf("Parsed '^'\n"); }
+ | T_LPAREN R T_RPAREN { printf("Parsed '( R )'\n"); }
+ ;
+R : T { printf("Parsed 'T'\n"); }
+ ;
+T : S T_COMMA T { printf("Parsed 'S , T'\n"); }
+ | S { printf("Parsed 'S'\n"); }
+ ;
+%%
+void yyerror(char *s) {
+ fprintf(stderr, "Error: %s at line %d\n", s, yylineno);
+}
+int main(void) {
+ return yyparse();
+}
+Output:
+1) ( ( ( a , a ) , ^ , ( a ) ) , a )
+2. ( ( ^ , a ) , a , ( ^ ) )
+3. ( ( a , ^ ) , , ( a ) )
+
+a. Design LALR parser using YACC & Lex tool 
+to check the syntax of the following C 
+Programs 
+Program 1: 
+//Fibonacci series
+#include<stdio.h>
+void main()
+{
+int f1=-1,f2=1,f3,i,n;
+printf("Enterthe no of termsto generate");
+scanf("%d" &n);
+printf("Fibonacci series\n");
+for(i=0;i<n;i++)
+{
+f3=f2+f1;
+printf("%d\n"
+,f3);
+f1=f2;
+f2=f3;
+}
+}
+Program 2: (CD6b.c) 
+//Fibonacci series
+#include<stdio.h>
+void main()
+{
+int f1=-1,f2=1,f3,i,n;
+printf("Enterthe no of termsto generate");
+scanf("%d"
+,&n);
+printf("Fibonacci series\n");
+for(i=0;i<n;i++)
+f3=f2+f1;
+printf("%d\n"
+,f3);
+f1=f2;
+f2=f3;
+}
+}
+LEX CODE: 
+%{
+#include "y.tab.h"
+extern void yyerror(const char *);
+%}
+DIGIT [0-9]
+LETTER [a-zA-Z_]
+ID {LETTER}({LETTER}|{DIGIT})*
+%%
+"#include"{ return INCLUDE; }
+"void" { return VOID; }
+"int" { return INT; }
+"main" { return MAIN; }
+"printf"{ return PRINTF; }
+"scanf" { return SCANF; }
+"for" { return FOR; }
+"return"{ return RETURN; }
+"{" { return '{'; }
+"}"{ return '}'; }
+"("{ return '('; }
+")"{ return ')'; }
+";"{ return ';'; }
+"," { return ','; }
+"=" { return '='; }
+"+" { return '+'; }
+"-" { return '-'; }
+"%" { return '%'; }
+\"([^\\\"]|\\.)*\"{ yylval.string_val = strdup(yytext); return STRING_LITERAL; }
+{DIGIT}+ { yylval.integer_val = atoi(yytext); return INTEGER; }
+"&" { return '&'; }
+{ID} { yylval.string_val = strdup(yytext); return ID; }
+[ \t\n]+ /* skip whitespace */
+. { yyerror("Unknown character"); }
+%%
+int yywrap(void) {
+return 1;
+}
+YACC CODE: 
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+void yyerror(const char *);
+int yylex(void);
+%}
+%union {
+int integer_val;
+char *string_val;
+}
+%token INCLUDE VOID INT MAIN PRINTF SCANF FOR RETURN STRING_LITERAL
+ID INTEGER
+%left '+' '-'
+%%
+program: include_declaration function_definition
+;
+include_declaration: INCLUDE '<' STRING_LITERAL '.' 'h' '>'
+;
+function_definition: VOID MAIN '(' ')' '{'statement_list '}'
+;
+statement_list:statement
+| statement_liststatement
+;
+statement: include_declaration
+| printf_statement
+| scanf_statement
+| for_loop_statement
+;
+printf_statement: PRINTF '(' STRING_LITERAL ')' ';'
+| PRINTF '(' STRING_LITERAL ',' expression ')' ';'
+;
+scanf_statement: SCANF '(' STRING_LITERAL ',' '&' ID ')' ';'
+;
+for_loop_statement: FOR '(' assignment';' expression ';' assignment ')' '{'statement_list
+'}'
+;
+assignment: ID '=' expression
+;
+expression: expression '+' expression
+| expression '-' expression
+| INTEGER
+;
+%%
+void yyerror(const char *s) {
+fprintf(stderr,"%s\n",s);
+}
+int main(void) {
+yyparse();
+return 0;
+}
+OUTPUT: 
+ 
+ 
+a) Generate three address codes for given Arithmetic expressions using Yacc and Lex
+tools.
+i) (a+b)*c-d/e+f%2
+ii) p/q+r*5-s^2-t%u
+Code:
+lex program
+%{
+#include "y.tab.h"
+%}
+%%
+[ \t\n]+ ; // ignore whitespace
+[-+*/%^=] { return yytext[0]; } // return operators
+[0-9]+ { yylval = atoi(yytext); return NUMBER; } // return numbers
+[a-zA-Z]+ { yylval = yytext[0]; return VARIABLE; } // return variables
+. { return yytext[0]; } // return other characters
+%%
+int yywrap() {
+return 1;
+}
+Yacc program
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX_INPUT_LENGTH 1000
+int temp_count=0;
+extern int yylex();
+extern FILE *yyin;
+extern int yyparse();
+int main() {
+char input[MAX_INPUT_LENGTH];
+printf("Enter the expression:\n");
+while (fgets(input, MAX_INPUT_LENGTH, stdin)) {
+// Check if input ends with a newline character
+if (input[strlen(input) - 1] == '\n') {
+input[strlen(input) - 1] = '\0'; // Remove newline character
+}
+// Set the input for parser
+yyin = fmemopen(input, strlen(input), "r");
+// Parse the input
+yyparse();
+// Prompt for next input
+printf("Enter the expression:\n");
+}
+return 0;
+}
+%}
+%token NUMBER VARIABLE
+%%
+expression: expression '+' expression { printf("t%d = t%d + t%d\n", ++temp_count, $1, $3); $$ 
+= temp_count; }
+| expression '-' expression { printf("t%d = t%d - t%d\n", ++temp_count, $1, $3); $$ = 
+temp_count; }
+| expression '*' expression { printf("t%d = t%d * t%d\n", ++temp_count, $1, $3); $$ = 
+temp_count; }
+| expression '/' expression { printf("t%d = t%d / t%d\n", ++temp_count, $1, $3); $$ = 
+temp_count; }
+| expression '%' expression { printf("t%d = t%d %% t%d\n", ++temp_count, $1, $3); $$ = 
+temp_count; }
+| expression '^' expression { printf("t%d = t%d ^ t%d\n", ++temp_count, $1, $3); $$ = 
+temp_count; }
+| expression '*' expression { printf("t%d = t%d * t%d\n", ++temp_count, $1, $3); $$ = 
+temp_count; }
+| expression '/' expression { printf("t%d = t%d / t%d\n", ++temp_count, $1, $3); $$ = 
+temp_count; }
+| expression '%' expression { printf("t%d = t%d %% t%d\n", ++temp_count, $1, $3); $$ = 
+temp_count; }
+| '(' expression ')' { $$ = $2; }
+| VARIABLE { printf("t%d = %c\n", ++temp_count, $1); $$ = temp_count; }
+| NUMBER { printf("t%d = %d\n", ++temp_count, $1); $$ = temp_count; }
+;
+%%
+int yyerror(char *s) {
+printf("Error: %s\n", s);
+return 0;
+}
+
+
+Output:
+b) Write a C program to generate machine code using the instruction sets of 8086
+microprocessor for the given three address code.
+Three address code
+x=y+z
+a=x-a
+b=y+a
+z=p*q
+y=b/a
+r=z-y
+t=r*q
+Code:
+#include <stdio.h>
+#include <string.h>
+void generate_assembly(const char* code) {
+ char dest[10], src1[10], src2[10], op;
+ // This simple sscanf assumes the three-address code is always in the form: dest = src1 op src2
+ if (sscanf(code, "%s = %s %c %s", dest, src1, &op, src2) == 4) {
+ switch (op) {
+ case '+':
+ printf("MOV AX, %s\n", src1);
+ printf("ADD AX, %s\n", src2);
+ printf("MOV %s, AX\n", dest);
+ break;
+ case '-':
+ printf("MOV AX, %s\n", src1);
+ printf("SUB AX, %s\n", src2);
+ printf("MOV %s, AX\n", dest);
+ break;
+ case '*':
+ printf("MOV AX, %s\n", src1);
+ printf("IMUL %s\n", src2); // IMUL for signed multiplication
+ printf("MOV %s, AX\n", dest);
+ break;
+ case '/':
+ printf("MOV AX, %s\n", src1);
+ printf("CWD\n"); // Convert word to doubleword in AX, DX
+ printf("IDIV %s\n", src2); // IDIV for signed division
+ printf("MOV %s, AX\n", dest);
+ break;
+ }
+ } else {
+ printf("Parsing error: %s\n", code);
+ }
+}
+int main() {
+ char* codes[] = {
+ "x = y + z",
+ "a = x - a",
+ "b = y + a",
+ "z = p * q",
+ "y = b / a",
+ "r = z - y",
+ "t = r * q"
+ };
+ int n = sizeof(codes) / sizeof(codes[0]);
+ for (int i = 0; i < n; i++) {
+ printf("Translating: %s\n", codes[i]);
+ generate_assembly(codes[i]);
+ printf("\n");
+ }
+ return 0;
+}
+Output:

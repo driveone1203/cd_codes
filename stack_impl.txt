@@ -1,0 +1,98 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define size 5
+
+struct stack {
+	int s[size];
+	int top;
+} st;
+
+int stfull() {
+	if (st.top >= size-1) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+void push(int item)
+{
+	st.top++;
+	st.s[st.top] = item;
+}
+
+int stempty() {
+	if (st.top == -1) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+
+int pop() {
+	int item;
+	item = st.s[st.top];
+	st.top--;
+	return item;
+}
+
+void display() {
+	int i;
+	if (stempty()) {
+		printf("Stack is Empty\n");
+	}
+	else {
+		for(i = st.top; i >= 0; i--) {
+			printf("%d\n", st.s[i]);
+		}
+	}
+}
+
+int main() {
+	int item, choice;
+	// char *ans = "y";
+	char ans = 'y';
+	st.top = -1;
+	printf("Implementation of stack\n");
+	do {
+		printf("Menu\n");
+		printf("1. Push\n2. Pop\n3. Display\n4. Exit\n");
+		printf("Enter choice: ");
+		scanf("%d", &choice);
+		switch (choice) {
+			case 1:
+				printf("Enter item to be pushed: ");
+				scanf("%d", &item);
+				if (stfull()) {
+					printf("Stack is full\n");
+				}
+				else {
+					push(item);
+				}
+				break;
+			case 2:
+				if (stempty()) {
+					printf("Empty stack! Underflow !!\n");
+				}
+				else {
+					item = pop();
+					printf("Popped element is %d\n", item);
+				}
+				break;
+			case 3:
+				display();
+				break;
+			case 4:
+				goto halt;
+				// break;
+		}
+		// printf("Do you want to continue ?");
+		// scanf("%c", &ans);
+		// fgets(ans, 3, stdin);
+		
+	} while (1);
+	halt: return 0;
+
+}

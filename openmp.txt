@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <omp.h>
+void main() {
+	#pragma omp parallel for
+	for (int i=0; i<10; i++) {
+		printf("Hello world\n");
+	}
+}
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include "omp.h" 
+int main() {
+#pragma omp parallel
+{
+int ID = omp_get_thread_num();
+printf("Hello (%d)\n", ID);
+printf("World (%d)\n", ID);
+}
+}
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include "omp.h"
+int main() {
+int nthreads, tid;
+#pragma omp parallel num_threads(4) private(tid)
+{
+tid = omp_get_thread_num();
+printf("Hello world from (%d)\n", tid);
+if (tid == 0) {
+nthreads = omp_get_num_threads();
+printf("number of threads = %d\n", nthreads);
+}
+}
+}
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include "omp.h"
+int main() {
+int nthreds, tid;
+omp_set_num_threads(3);
+#pragma omp parallel private(tid)
+{
+int i;
+tid = omp_get_thread_num();
+printf("Hello world from (%d)\n", tid);
+#pragma omp for
+for (i=0; i<=4; i++) {
+printf("Iteration %d by %d\n", i, tid);
+}
+}
+}
+
+
+#include<stdio.h>
+#include<omp.h>
+void main()
+{
+int id;
+  double wtime;
+  printf ( "\n" );
+  printf ( "HELLO_OPENMP\n" );
+  printf ( "  C/OpenMP version\n" );
+  printf ( "\n" );
+  printf ( "  Number of processors available = %d\n", omp_get_num_procs ( ) );
+  printf ( "  Number of threads =              %d\n", omp_get_max_threads ( ) );
+  wtime = omp_get_wtime ( );
+  printf ( "\n" );
+  printf ( "  OUTSIDE the parallel region.\n" );
+  printf ( "\n" );
+  id = omp_get_thread_num ( );
+  printf ( "  HELLO from process %d\n", id ) ;
+  printf ( "\n" );
+  printf ( "  Going INSIDE the parallel region:\n" );
+  printf ( "\n" );
+/*
+  INSIDE THE PARALLEL REGION, have each thread say hello.
+*/
+# pragma omp parallel \
+  private ( id )
+  {
+    id = omp_get_thread_num ( );
+    printf ("  Hello from process %d\n", id );
+  }
+/*
+  Finish up by measuring the elapsed time.
+*/
+  wtime = omp_get_wtime ( ) - wtime;
+ 
+  printf ( "\n" );
+  printf ( "  Back OUTSIDE the parallel region.\n" );
+/*
+  Terminate.
+*/
+  printf ( "\n" );
+  printf ( "HELLO_OPENMP\n" );
+  printf ( "  Normal end of execution.\n" );
+  printf ( "\n" );
+  printf ( "  Elapsed wall clock time = %f\n", wtime );
+}

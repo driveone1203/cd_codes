@@ -1,0 +1,83 @@
+// Taking input and printing output in terminal only and also identify few keywords
+%{
+#include<stdio.h>
+%}
+
+%%
+bool|int|float {printf("Keyword\n");}
+[-,+]?[0-9]+ {printf("Constants\n");}
+[,.']+ {printf("Punctuation Chars\n");}
+[!@#$^&()]+ {printf("Special Chars\n");}
+[a-zA-Z]+ {printf("Identifiers\n");}
+%%
+
+int yywrap()
+{return 1;
+}
+void main()
+{
+yylex();
+}
+
+
+// Input and output are both taken and given via files.
+%{
+#include<stdio.h>
+%}
+%%
+bool|int|float {(fprintf(yyout,"Keyword\n",yytext));}
+[-,+]?[0-9]+ {fprintf(yyout,"Constants\n",yytext);}
+[,.';]+ {fprintf(yyout, "Punctuation Chars\n",yytext);}
+[!@#$^&()]+ {fprintf(yyout,"Special Chars\n",yytext);}
+[a-zA-Z]+ {fprintf(yyout,"Identifiers\n",yytext);}
+%%
+
+int yywrap()
+{
+	return 1;
+}
+int main()
+{
+	extern FILE *yyin;
+	yyin=fopen("inp.txt","r");
+	yyout = fopen("out.txt","w");
+	while(!feof(yyin)){
+		yylex();
+	}
+	return 0;
+}
+
+// Validate a given arithmetic expression
+
+%{
+#include<stdio.h>
+int b=0,op=0,ident=0,flag=0;
+%}
+
+%%
+[a-zA-Z]+[0-9A-Za-z]* {ident++;}
+[0-9]+ {ident++;}
+[\+\-\*/\=] {op++;}
+"(" {b++;}
+")" {b--;}
+";" {flag=1;}
+.|\n {return 0;}
+%%
+
+int yywrap() {
+	return 1;
+}
+
+int main()
+{
+printf("Enter the expression : ");
+yylex();
+if((op+1)==ident && b==0 && flag==0)
+{
+printf("\nExpression is Valid");
+printf("\nNo of identifier = %d \nNo of Operators = %d \n",ident,op);
+}
+else
+printf("\nExpression is Invalid");
+return 0;
+}
